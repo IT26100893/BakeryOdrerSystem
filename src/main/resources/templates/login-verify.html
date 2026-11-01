@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Verify login')}"></head>
+<body class="auth-page">
+<nav th:replace="~{fragments :: nav('login')}"></nav>
+
+<div class="auth-stage">
+  <section class="auth-wrap">
+    <div class="auth-left">
+      <div class="auth-logo"><svg class="logo" aria-hidden="true"><use href="#wheat"/></svg><strong>Crumb &amp; Co.</strong><small>Bakery &middot; Cakes &middot; Custom Orders</small></div>
+      <h1>Check your <span>email</span></h1>
+      <p class="sub">We sent a 6-digit verification code to <b th:text="${maskedEmail}">n***@mail.com</b>. Enter it below to finish logging in. The code is valid for 10 minutes.</p>
+
+      <div class="msg err" th:if="${error}" th:text="${error}" role="alert"></div>
+      <div class="msg okk" th:if="${msg}" th:text="${msg}" role="status"></div>
+
+      <form method="post" th:action="@{/login/verify}">
+        <div class="field"><svg class="ic"><use href="#i-shield"/></svg>
+          <input name="code" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="6-digit code" aria-label="Verification code"
+                 required autofocus autocomplete="one-time-code" style="letter-spacing:.35em;font-weight:700"></div>
+        <button class="btn pill block" type="submit">Verify &amp; Log In <svg class="ic"><use href="#i-arrow"/></svg></button>
+      </form>
+
+      <form method="post" th:action="@{/login/resend}" style="margin-top:.8rem">
+        <button class="btn ghost block" type="submit">Send a new code</button>
+      </form>
+
+      <div class="or"><span>or</span></div>
+      <p class="switch"><a th:href="@{/login}">&larr; Back to log in</a></p>
+    </div>
+    <aside class="auth-right">
+      <p class="script">Sweet Moments</p>
+      <h2>Extra Safe <svg class="ic"><use href="#i-shield"/></svg></h2>
+      <p>The code protects your account, so only you can log in even if someone knows your password.</p>
+      <img class="auth-photo" th:src="@{/css/images/bread_and_savoury.jpg}" alt="">
+    </aside>
+  </section>
+</div>
+</body></html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments :: head('Customers')}"></head>
+
+<body>
+
+<nav th:replace="~{fragments :: nav('users')}"></nav>
+
+<main>
+
+ <h1>Users</h1>
+
+ <div class="error" th:if="${error}" th:text="${error}" role="alert"></div>
+
+ <p style="color:var(--muted);margin-top:-1rem;margin-bottom:2rem;">
+  Manage customer and administrator accounts.
+ </p>
+
+
+ <div class="grid">
+
+
+  <!-- USER FORM -->
+
+  <section class="card">
+
+   <h2 th:text="${item == null} ? 'Register a User' : 'Edit User'">
+    Register a User
+   </h2>
+
+
+   <form method="post"
+         action="/admin/users/save">
+
+    <input type="hidden"
+           name="id"
+           th:value="${item?.id}">
+
+
+    <label for="role">
+     Account role
+    </label>
+
+    <select id="role"
+            name="role">
+
+     <option th:each="r : ${ {'CUSTOMER','ADMIN'} }"
+             th:value="${r}"
+             th:text="${r}"
+             th:selected="${item != null and item.role == r}">
+     </option>
+
+    </select>
+
+
+    <label for="name">
+     Full name
+    </label>
+
+    <input id="name"
+           name="name"
+           required
+           placeholder="Enter full name"
+           th:value="${item?.name}">
+
+
+    <label for="email">
+     Email address
+    </label>
+
+    <input id="email"
+           name="email"
+           type="email"
+           required
+           placeholder="customer@email.com"
+           th:value="${item?.email}">
+
+
+    <label for="phone">
+     Phone number
+    </label>
+
+    <input id="phone"
+           name="phone"
+           type="tel"
+           required
+           placeholder="07XXXXXXXX"
+           th:value="${item?.phone}">
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" minlength="6" autocomplete="new-password"
+           th:required="${item == null}"
+           th:placeholder="${item == null} ? 'At least 6 characters' : 'Leave blank to keep the current password'">
+
+
+
+    <div class="form-actions">
+
+     <button class="btn"
+             type="submit"
+             th:text="${item == null} ? '👤 Register User' : '💾 Save Changes'">
+      Save
+     </button>
+
+     <a class="btn ghost"
+        th:if="${item != null}"
+        href="/admin/users">
+      Cancel
+     </a>
+
+    </div>
+
+   </form>
+
+  </section>
+
+
+  <!-- CUSTOMER LIST -->
+
+  <section class="card">
+
+   <form class="search"
+         method="get">
+
+    <input name="q"
+           th:value="${q}"
+           placeholder="🔍 Search name or email..."
+           aria-label="Search customers">
+
+    <button class="btn"
+            type="submit">
+     Search
+    </button>
+
+   </form>
+
+
+   <div class="wrap">
+
+    <table>
+
+     <thead>
+
+     <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Phone</th>
+      <th>Role</th>
+      <th>Actions</th>
+     </tr>
+
+     </thead>
+
+
+     <tbody>
+
+     <tr th:each="u : ${items}">
+
+      <td>
+
+       <strong th:text="${u.name}">
+        Customer
+       </strong>
+
+      </td>
+
+
+      <td th:text="${u.email}">
+       email@example.com
+      </td>
+
+
+      <td th:text="${u.phone}">
+       07XXXXXXXX
+      </td>
+
+
+      <td>
+
+                            <span class="badge"
+                                  th:text="${u.role}">
+                                CUSTOMER
+                            </span>
+
+      </td>
+
+
+      <td>
+
+       <a class="btn sm ghost"
+          th:href="@{/admin/users(edit=${u.id})}">
+        Edit
+       </a>
+
+
+       <form class="inline"
+             method="post"
+             th:action="@{/admin/users/delete/{id}(id=${u.id})}"
+             onsubmit="return confirm('Delete this user?')">
+
+        <button class="btn sm"
+                type="submit">
+         Delete
+        </button>
+
+       </form>
+
+      </td>
+
+     </tr>
+
+     </tbody>
+
+    </table>
+
+   </div>
+
+
+   <p class="empty"
+      th:if="${#lists.isEmpty(items)}">
+
+    👥 No customers found.
+
+   </p>
+
+  </section>
+
+ </div>
+
+</main>
+
+</body>
+</html>

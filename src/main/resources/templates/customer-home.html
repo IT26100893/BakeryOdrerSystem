@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('My account')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav('home')}"></nav>
+<main>
+  <h1>Welcome, <span th:text="${session.uname}">friend</span></h1>
+  <section class="stats">
+    <a class="stat" th:href="@{/shop}"><span>Browse</span><strong>Menu</strong></a>
+    <a class="stat" th:href="@{/customer/orders}"><span>My orders</span><strong th:text="${orderCount}">0</strong></a>
+    <a class="stat" th:href="@{/customer/bookings}"><span>My custom cakes</span><strong th:text="${bookingCount}">0</strong></a>
+    <a class="stat" th:href="@{/customer/deliveries}"><span>My deliveries</span><strong th:text="${deliveryCount}">0</strong></a>
+    <a class="stat" th:href="@{/customer/reviews}"><span>My reviews</span><strong th:text="${reviewCount}">0</strong></a>
+    <a class="stat" th:href="@{/customer/profile}"><span>My details</span><strong>Profile</strong></a>
+  </section>
+</main>
+</body></html>

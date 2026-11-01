@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Booking summary')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav('bookings')}"></nav>
+<main class="sheet-main">
+  <div class="sheet-actions no-print">
+    <a class="btn ghost" th:href="@{${backUrl}}">&larr; Back</a>
+    <button class="btn" type="button" onclick="window.print()">Print summary</button>
+  </div>
+
+  <article class="sheet">
+    <header class="sheet-head">
+      <div><strong class="sheet-brand">Crumb &amp; Co.</strong><small>Bakery &middot; Cakes &middot; Custom Orders</small></div>
+      <div class="sheet-title"><h1>Custom cake booking</h1><span th:text="'Ref. ' + ${b.id}">Ref. BK123456</span></div>
+    </header>
+
+    <dl class="sheet-grid">
+      <div><dt>Customer</dt><dd th:text="${b.customerName}">Name</dd></div>
+      <div><dt>Phone</dt><dd th:text="${b.phone}">077</dd></div>
+      <div><dt>Flavour</dt><dd th:text="${b.flavour}">Chocolate</dd></div>
+      <div><dt>Size</dt><dd th:text="${b.sizeKg} + ' kg'">2 kg</dd></div>
+      <div><dt>Pickup date</dt><dd th:text="${b.pickupDate}">2026-11-15</dd></div>
+      <div><dt>Status</dt><dd><span th:class="'badge ' + ${b.status}" th:text="${b.status}">PENDING</span></dd></div>
+      <div class="wide"><dt>Message on the cake</dt><dd th:text="${b.message == ''} ? '(no message)' : ${b.message}">Happy Birthday</dd></div>
+    </dl>
+
+    <h2 class="sheet-h2">Price estimate</h2>
+    <table class="sheet-table">
+      <thead><tr><th>Description</th><th>Size</th><th>Rate per kg</th><th>Amount</th></tr></thead>
+      <tbody>
+        <tr>
+          <td th:text="${b.flavour} + ' custom cake'">Custom cake</td>
+          <td th:text="${b.sizeKg} + ' kg'">2 kg</td>
+          <td th:text="'Rs. ' + ${#numbers.formatDecimal(3500,1,'COMMA',2,'POINT')}">Rs. 3,500.00</td>
+          <td th:text="'Rs. ' + ${#numbers.formatDecimal(b.estimatedPrice,1,'COMMA',2,'POINT')}">Rs. 7,000.00</td>
+        </tr>
+      </tbody>
+      <tfoot><tr class="sheet-total"><td colspan="3">Estimated total</td><td th:text="'Rs. ' + ${#numbers.formatDecimal(b.estimatedPrice,1,'COMMA',2,'POINT')}">Rs. 7,000.00</td></tr></tfoot>
+    </table>
+    <p class="sheet-note">This is an estimate. The final price is confirmed by the bakery. Please bring this summary (or the reference number) when you collect your cake.</p>
+
+    <div class="sheet-sign">
+      <div><span></span>Bakery staff</div>
+      <div><span></span>Customer signature</div>
+    </div>
+    <p class="sheet-foot">Thank you for choosing Crumb &amp; Co. &mdash; Fresh Bakes. Custom Cakes. Sweet Moments.</p>
+  </article>
+</main>
+</body></html>

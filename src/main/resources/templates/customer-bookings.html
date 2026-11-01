@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('My custom cakes')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav('bookings')}"></nav>
+<main>
+  <h1>My custom cakes</h1>
+  <div class="error" th:if="${error}" th:text="${error}" role="alert"></div>
+  <div class="ok" th:if="${msg}" th:text="${msg}" role="status"></div>
+  <div class="grid">
+    <section class="card">
+      <h2 th:text="${item == null} ? 'Book a cake' : 'Edit booking'">Book a cake</h2>
+      <form method="post" th:action="@{/customer/bookings/save}">
+        <input type="hidden" name="id" th:value="${item?.id}">
+        <label for="customerName">Name</label>
+        <input id="customerName" name="customerName" required th:value="${item != null} ? ${item.customerName} : ${session.uname}">
+        <label for="phone">Phone</label>
+        <input id="phone" name="phone" type="tel" required th:value="${item?.phone}">
+        <label for="flavour">Flavour</label>
+        <input id="flavour" name="flavour" required placeholder="Chocolate, Vanilla, Red Velvet..." th:value="${item?.flavour}">
+        <label for="sizeKg">Size (kg) - Rs. 3,500 per kg</label>
+        <input id="sizeKg" name="sizeKg" type="number" step="0.5" min="0.5" max="20" required th:value="${item?.sizeKg}">
+        <label for="message">Message on the cake</label>
+        <input id="message" name="message" maxlength="60" th:value="${item?.message}">
+        <label for="pickupDate">Pickup date</label>
+        <input id="pickupDate" name="pickupDate" type="date" required th:value="${item?.pickupDate}">
+        <div class="form-actions">
+          <button class="btn" type="submit" th:text="${item == null} ? 'Book cake' : 'Save changes'">Book cake</button>
+          <a class="btn ghost" th:if="${item != null}" th:href="@{/customer/bookings}">Cancel</a>
+        </div>
+      </form>
+    </section>
+    <section class="card">
+      <h2>My bookings</h2>
+      <div class="wrap"><table>
+        <thead><tr><th>Cake</th><th>Pickup</th><th>Estimate</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          <tr th:each="b : ${items}">
+            <td><b th:text="${b.flavour} + ', ' + ${b.sizeKg} + ' kg'"></b><br><small th:text="${b.message}"></small></td>
+            <td th:text="${b.pickupDate}"></td>
+            <td th:text="'Rs. ' + ${#numbers.formatDecimal(b.estimatedPrice,1,'COMMA',2,'POINT')}"></td>
+            <td><span th:class="'badge ' + ${b.status}" th:text="${b.status}"></span></td>
+            <td th:if="${b.status == 'PENDING'}">
+              <a class="btn sm ghost" th:href="@{/customer/bookings/detail/{id}(id=${b.id})}">Summary</a>
+              <a class="btn sm ghost" th:href="@{/customer/bookings(edit=${b.id})}">Edit</a>
+              <form style="display:inline" method="post" th:action="@{/customer/bookings/delete/{id}(id=${b.id})}" onsubmit="return confirm('Cancel this booking?')">
+                <button class="btn sm" type="submit">Cancel</button>
+              </form>
+            </td>
+            <td th:unless="${b.status == 'PENDING'}">
+              <a class="btn sm ghost" th:href="@{/customer/bookings/detail/{id}(id=${b.id})}">Summary</a> <small>Locked</small>
+            </td>
+          </tr>
+        </tbody>
+      </table></div>
+      <p class="empty" th:if="${#lists.isEmpty(items)}">No bookings yet. Book your first cake on the left.</p>
+    </section>
+  </div>
+</main>
+</body></html>

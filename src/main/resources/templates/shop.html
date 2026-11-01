@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments :: head(${title})}"></head>
+
+<body>
+
+<nav th:replace="~{fragments :: nav('shop')}"></nav>
+
+<main>
+
+    <!-- BANNER -->
+    <section class="shop-banner">
+
+        <div class="crumbs">
+            <a th:href="@{/}">Home</a> /
+            <span th:text="${title}">Bread &amp; Savouries</span>
+        </div>
+
+        <h1 th:text="${title}">Bread &amp; Savouries</h1>
+
+        <p>Freshly baked every day with quality ingredients.</p>
+
+    </section>
+
+
+    <div class="shop">
+
+        <!-- FILTERS -->
+        <aside class="filters">
+
+            <h2>Filters</h2>
+
+            <div class="fbox">
+                <h3>Category</h3>
+
+                <div class="catlist">
+
+                    <a th:href="@{/shop}"
+                       th:classappend="${category == null or category == ''} ? 'on'">All products</a>
+
+                    <a th:href="@{/shop(category='BREAD')}"
+                       th:classappend="${category == 'BREAD'} ? 'on'">Bread &amp; Savouries</a>
+
+                    <a th:href="@{/shop(category='CAKE')}"
+                       th:classappend="${category == 'CAKE'} ? 'on'">Cakes</a>
+
+                    <a th:href="@{/shop(category='PASTRY')}"
+                       th:classappend="${category == 'PASTRY'} ? 'on'">Pastries &amp; Cake Pieces</a>
+
+                </div>
+            </div>
+
+            <div class="fbox">
+                <h3>Price (Rs.)</h3>
+
+                <div class="range">
+                    <input id="minPrice" type="number" min="0" placeholder="Min" aria-label="Minimum price">
+                    <input id="maxPrice" type="number" min="0" placeholder="Max" aria-label="Maximum price">
+                </div>
+
+                <button type="button" class="btn" id="applyFilters"
+                        style="width:100%;margin-top:1rem;">
+                    Apply Filters
+                </button>
+            </div>
+
+            <a class="btn ghost" th:if="${session.role == 'ADMIN'}" th:href="@{/admin/products}" style="width:100%;">
+                ⚙ Manage products
+            </a>
+
+        </aside>
+
+
+        <!-- PRODUCTS -->
+        <section>
+
+            <div class="shop-head">
+
+                <h2>
+                    <span th:text="${title}">Bread &amp; Savouries</span>
+                    (<span id="pcount" th:text="${#lists.size(items)}">0</span> Products)
+                </h2>
+
+                <label class="sort">
+                    Sort by:
+                    <select id="sortBy" aria-label="Sort products">
+                        <option value="default">Default Sorting</option>
+                        <option value="low">Price: Low to High</option>
+                        <option value="high">Price: High to Low</option>
+                        <option value="name">Name: A to Z</option>
+                    </select>
+                </label>
+
+            </div>
+
+
+            <!-- PRODUCT GRID -->
+            <div class="pgrid" id="pgrid">
+
+                <article class="pcard"
+                         th:each="p : ${items}"
+                         th:attr="data-price=${p.price},data-name=${p.name}"
+                         th:data-href="@{/product/{id}(id=${p.id})}">
+
+                    <div class="pimg">
+
+                        <th:block th:with="img=${@productImages.forProduct(p)}">
+
+                            <!-- product photo (static/css/images) -->
+                            <img th:if="${img != null}"
+                                 th:src="@{${img}}"
+                                 th:alt="${p.name}">
+
+                            <!-- emoji when there is no photo for this product -->
+                            <span th:unless="${img != null}"
+                                  th:text="${#strings.toString(p.category) == 'BREAD' ? '🍞' : (#strings.toString(p.category) == 'CAKE' ? '🎂' : '🥐')}">🍞</span>
+
+                        </th:block>
+
+                        <span class="ptag" th:if="${p.stock == 0}">Sold out</span>
+
+                        <span class="ptag"
+                              th:if="${p.stock > 0 and p.stock <= 5}"
+                              th:text="'Only ' + ${p.stock} + ' left'">Only 3 left</span>
+
+                    </div>
+
+                    <div class="pbody">
+
+                        <div class="pname"><a th:href="@{/product/{id}(id=${p.id})}" th:text="${p.name}">Sliced Bread 550g</a></div>
+                        <div class="pdetail" th:text="${p.detail}">Wheat</div>
+
+                        <a class="prate" th:with="rs=${ratings.get(p.id)}" th:href="@{/product/{id}(id=${p.id})}">
+                            <th:block th:if="${rs != null}">
+                                <span class="stars" th:text="${rs.stars}">★★★★★</span>
+                                <small th:text="${#numbers.formatDecimal(rs.average,1,1) + ' (' + rs.count + ')'}">4.5 (2)</small>
+                            </th:block>
+                            <small th:if="${rs == null}">No reviews yet</small>
+                        </a>
+
+                        <div class="pfoot">
+
+                            <strong class="pprice"
+                                    th:text="'Rs. ' + ${#numbers.formatDecimal(p.price,1,'COMMA',2,'POINT')}">
+                                Rs. 180.00
+                            </strong>
+
+                            <form class="inline" method="post" data-ajax-cart th:if="${p.stock > 0 and session.role == 'CUSTOMER'}" th:action="@{/customer/cart/add}">
+                                <input type="hidden" name="productId" th:value="${p.id}">
+                                <input type="hidden" name="qty" value="1">
+                                <input type="hidden" name="back" th:value="${backUrl}">
+                                <button class="btn sm" type="submit">Add +</button>
+                            </form>
+                            <a class="btn sm" th:if="${p.stock > 0 and session.role == null}" th:href="@{/login}">Add +</a>
+
+                            <span class="btn sm ghost"
+                                  th:if="${p.stock == 0}">Unavailable</span>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+
+            <p class="empty" th:if="${#lists.isEmpty(items)}">
+                🍰 No products found in this category yet.
+            </p>
+
+            <p class="empty" id="noMatch" hidden>
+                No products match this price range.
+            </p>
+
+        </section>
+
+    </div>
+
+</main>
+
+
+<script>
+    (function () {
+
+        var grid    = document.getElementById('pgrid');
+        var minI    = document.getElementById('minPrice');
+        var maxI    = document.getElementById('maxPrice');
+        var sortSel = document.getElementById('sortBy');
+        var count   = document.getElementById('pcount');
+        var noMatch = document.getElementById('noMatch');
+        var btn     = document.getElementById('applyFilters');
+
+        var cards = [].slice.call(grid.querySelectorAll('.pcard'));
+
+        cards.forEach(function (c, i) { c.dataset.i = i; });
+
+        /* show the real price range as placeholders */
+        if (cards.length) {
+            var prices = cards.map(function (c) { return parseFloat(c.dataset.price) || 0; });
+            minI.placeholder = Math.min.apply(null, prices);
+            maxI.placeholder = Math.max.apply(null, prices);
+        }
+
+        function applyFilters() {
+            var lo = parseFloat(minI.value);
+            var hi = parseFloat(maxI.value);
+            var shown = 0;
+
+            cards.forEach(function (c) {
+                var p  = parseFloat(c.dataset.price) || 0;
+                var ok = (isNaN(lo) || p >= lo) && (isNaN(hi) || p <= hi);
+                c.hidden = !ok;
+                if (ok) shown++;
+            });
+
+            count.textContent = shown;
+            noMatch.hidden = !(cards.length > 0 && shown === 0);
+        }
+
+        function applySort() {
+            var v = sortSel.value;
+            var list = cards.slice();
+
+            list.sort(function (a, b) {
+                if (v === 'low')  return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+                if (v === 'high') return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+                if (v === 'name') return a.dataset.name.localeCompare(b.dataset.name);
+                return a.dataset.i - b.dataset.i;
+            });
+
+            list.forEach(function (c) { grid.appendChild(c); });
+        }
+
+        btn.addEventListener('click', applyFilters);
+        sortSel.addEventListener('change', applySort);
+
+        [minI, maxI].forEach(function (i) {
+            i.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') { e.preventDefault(); applyFilters(); }
+            });
+        });
+
+    })();
+</script>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Home')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav('home')}"></nav>
+
+<!-- HERO -->
+<section class="home-hero">
+  <div class="wrapw hero-grid">
+    <div class="hero-copy">
+      <p class="script">Welcome to Crumb &amp; Co.</p>
+      <h1>Freshly Baked <em>Happiness</em></h1>
+      <p class="lead">From warm breads to custom cakes, we bake with love, just for you.</p>
+      <div class="hero-actions">
+        <a class="btn pill" th:href="@{/customer/orders}"><svg class="ic"><use href="#i-cake"/></svg>Order Now <svg class="ic"><use href="#i-arrow"/></svg></a>
+        <a class="btn pill outline" th:href="@{/customer/bookings}"><svg class="ic"><use href="#i-cake"/></svg>Custom Cake</a>
+      </div>
+    </div>
+</div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="band light">
+  <div class="wrapw">
+    <div class="band-head">
+      <div><span class="eyebrow">Shop by category</span><h2>Explore Our Delights</h2></div>
+      <a class="viewall" th:href="@{/shop}">View All <svg class="ic"><use href="#i-arrow"/></svg></a>
+    </div>
+    <div class="cat-grid">
+      <a class="cat-card" th:href="@{/shop(category='BREAD')}">
+        <img th:src="@{/css/images/bread_and_savoury.jpg}" alt="">
+        <span class="cat-label"><i class="cat-ic"><svg class="ic"><use href="#i-bread"/></svg></i>Bread &amp; Savouries <svg class="ic sm"><use href="#i-arrow"/></svg></span>
+      </a>
+      <a class="cat-card" th:href="@{/shop(category='CAKE')}">
+        <img th:src="@{/css/images/Marber_gateau.jpg}" alt="">
+        <span class="cat-label"><i class="cat-ic"><svg class="ic"><use href="#i-cake"/></svg></i>Cakes <svg class="ic sm"><use href="#i-arrow"/></svg></span>
+      </a>
+      <a class="cat-card" th:href="@{/shop(category='PASTRY')}">
+        <img th:src="@{/css/images/Cake_Pieces.jpg}" alt="">
+        <span class="cat-label"><i class="cat-ic"><svg class="ic"><use href="#i-cake"/></svg></i>Cake Pieces <svg class="ic sm"><use href="#i-arrow"/></svg></span>
+      </a>
+      <a class="cat-card" th:href="@{/shop(q='sandwich')}">
+        <img th:src="@{/css/images/cheese_sandwich.png}" alt="">
+        <span class="cat-label"><i class="cat-ic"><svg class="ic"><use href="#i-bread"/></svg></i>Sandwiches <svg class="ic sm"><use href="#i-arrow"/></svg></span>
+      </a>
+      <a class="cat-card" th:href="@{/shop(q='bun')}">
+        <img th:src="@{/css/images/dinner_bun.png}" alt="">
+        <span class="cat-label"><i class="cat-ic"><svg class="ic"><use href="#i-bread"/></svg></i>Buns &amp; Loaves <svg class="ic sm"><use href="#i-arrow"/></svg></span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- POPULAR PICKS (from the database) -->
+<section class="band dark">
+  <div class="wrapw">
+    <div class="band-head">
+      <div><span class="eyebrow">Our favourites</span><h2>Popular Picks</h2></div>
+      <a class="btn pill outline sm" th:href="@{/shop}">View All Products <svg class="ic sm"><use href="#i-arrow"/></svg></a>
+    </div>
+    <div class="pick-grid">
+      <article class="pick" th:each="p, st : ${picks}" th:data-href="@{/product/{id}(id=${p.id})}">
+        <span class="best" th:if="${st.first}">Best Seller</span>
+        <img th:src="@{${p.image}}" th:alt="${p.name}">
+        <div class="pick-body">
+          <h3><a th:href="@{/product/{id}(id=${p.id})}" th:text="${p.name}">Product</a></h3>
+          <div class="pick-row">
+            <strong th:text="'Rs. ' + ${#numbers.formatDecimal(p.price,1,'COMMA',0,'POINT')}">Rs. 0</strong>
+            <form class="inline" method="post" data-ajax-cart th:if="${session.role == 'CUSTOMER'}" th:action="@{/customer/cart/add}"><input type="hidden" name="productId" th:value="${p.id}"><input type="hidden" name="qty" value="1"><input type="hidden" name="back" value="/"><button class="cartbtn" type="submit" aria-label="Add to cart"><svg class="ic"><use href="#i-cart"/></svg></button></form><a class="cartbtn" th:if="${session.role == null}" th:href="@{/login}" aria-label="Log in to add to cart"><svg class="ic"><use href="#i-cart"/></svg></a>
+          </div>
+        </div>
+      </article>
+    </div>
+    <p class="empty-note" th:if="${#lists.isEmpty(picks)}">Products will appear here once they are added by the shop.</p>
+  </div>
+</section>
+
+<!-- CUSTOM CAKES -->
+<section class="custom-band">
+  <div class="wrapw custom-grid">
+    <div class="custom-img">
+      <img th:src="@{/css/images/Signature_Cake.jpg}" alt="A signature chocolate cake">
+      <span class="script note">Made just<br>for you!</span>
+    </div>
+    <div class="custom-copy">
+      <span class="eyebrow dark">Custom cakes</span>
+      <h2>Make It Personal</h2>
+      <p>From birthdays to weddings, we create custom cakes that match your style, theme and taste. Share your ideas and we'll bring them to life!</p>
+      <a class="btn pill" th:href="@{/customer/bookings}"><svg class="ic"><use href="#i-cake"/></svg>Design Your Cake <svg class="ic"><use href="#i-arrow"/></svg></a>
+    </div>
+    <ul class="custom-steps">
+      <li><svg class="ic"><use href="#i-drop"/></svg>Choose your flavour</li>
+      <li><svg class="ic"><use href="#i-pen"/></svg>Pick your size</li>
+      <li><svg class="ic"><use href="#i-chat"/></svg>Add a personal message</li>
+      <li><svg class="ic"><use href="#i-cal"/></svg>Choose your pickup date</li>
+    </ul>
+  </div>
+</section>
+
+<!-- CUSTOMER REVIEWS -->
+<section class="band light" th:if="${!#lists.isEmpty(highlights)}">
+  <div class="wrapw">
+    <div class="band-head">
+      <div><span class="eyebrow">Happy customers</span><h2>What People Say</h2>
+        <p style="margin:.3rem 0 0;color:var(--muted)" th:if="${overall.count > 0}"><span class="stars" th:text="${overall.stars}"></span> <b th:text="${#numbers.formatDecimal(overall.average,1,1)}">4.5</b> from <span th:text="${overall.count}">0</span> reviews</p></div>
+      <a class="viewall" th:href="@{/shop}">Browse the menu <svg class="ic"><use href="#i-arrow"/></svg></a>
+    </div>
+    <div class="home-reviews">
+      <article class="home-review" th:each="r : ${highlights}">
+        <span class="stars" th:text="${r.stars}">★★★★★</span>
+        <p th:text="${r.text == ''} ? 'Loved it!' : ${r.text}">Review</p>
+        <small><b th:text="${r.customerName}">Name</b> on <a th:href="@{/reviews/{id}(id=${r.productId})}" th:text="${r.productName}">Product</a></small>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<section class="trust">
+  <div class="wrapw trust-grid">
+    <div><svg class="ic"><use href="#i-leaf"/></svg><b>Fresh Ingredients</b><span>Only the best for you</span></div>
+    <div><svg class="ic"><use href="#i-heart"/></svg><b>Handmade with Love</b><span>Baked fresh daily</span></div>
+    <div><svg class="ic"><use href="#i-bolt"/></svg><b>Quick &amp; Easy</b><span>Order in a few clicks</span></div>
+    <div><svg class="ic"><use href="#i-shield"/></svg><b>Secure Login</b><span>Your details stay safe</span></div>
+  </div>
+</section>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body></html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Log in')}"></head>
+<body class="auth-page">
+<nav th:replace="~{fragments :: nav('login')}"></nav>
+
+<div class="auth-stage">
+  <section class="auth-wrap">
+    <div class="auth-left">
+      <div class="auth-logo"><svg class="logo" aria-hidden="true"><use href="#wheat"/></svg><strong>Crumb &amp; Co.</strong><small>Bakery &middot; Cakes &middot; Custom Orders</small></div>
+      <h1>Welcome <span>Back!</span></h1>
+      <p class="sub">Log in to your account and continue your sweet journey with us.</p>
+
+      <div class="msg err" th:if="${error}" th:text="${error}" role="alert"></div>
+      <div class="msg okk" th:if="${msg}" th:text="${msg}" role="status"></div>
+
+      <form method="post" th:action="@{/login}">
+        <div class="field"><svg class="ic"><use href="#i-mail"/></svg>
+          <input name="email" type="email" placeholder="Email Address" aria-label="Email address" required autocomplete="username" th:value="${email}"></div>
+        <div class="field"><svg class="ic"><use href="#i-lock"/></svg>
+          <input id="pw" name="password" type="password" placeholder="Password" aria-label="Password" required autocomplete="current-password">
+          <button type="button" class="eye" id="eye" aria-label="Show or hide password"><svg class="ic"><use href="#i-eye"/></svg></button></div>
+        <button class="btn pill block" type="submit">Log In <svg class="ic"><use href="#i-arrow"/></svg></button>
+      </form>
+
+      <div class="or"><span>or</span></div>
+      <p class="switch">New here? <a th:href="@{/register}">Create a customer account</a></p>
+    </div>
+    <aside class="auth-right">
+      <p class="script">Sweet Moments</p>
+      <h2>Start Here <svg class="ic"><use href="#i-heart"/></svg></h2>
+      <p>Join Crumb &amp; Co. and enjoy easy ordering and more delicious moments.</p>
+      <ul class="perks">
+        <li><i><svg class="ic"><use href="#i-cake"/></svg></i><span><b>Custom Cake Bookings</b>Design a cake for your special day</span></li>
+        <li><i><svg class="ic"><use href="#i-star"/></svg></i><span><b>Easy Ordering</b>Quick &amp; simple</span></li>
+        <li><i><svg class="ic"><use href="#i-heart"/></svg></i><span><b>Track Your Orders</b>See every order in one place</span></li>
+      </ul>
+      <img class="auth-photo" th:src="@{/css/images/bread_and_savoury.jpg}" alt="">
+    </aside>
+  </section>
+</div>
+
+<script>
+  document.getElementById('eye').addEventListener('click', function () {
+    var f = document.getElementById('pw'); f.type = f.type === 'password' ? 'text' : 'password';
+  });
+</script>
+</body></html>

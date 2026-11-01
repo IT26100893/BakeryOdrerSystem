@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head(${title})}"></head>
+<body>
+<nav th:replace="~{fragments :: nav('shop')}"></nav>
+
+<main class="pd-page" th:with="img=${@productImages.forProduct(product)}">
+
+  <div class="crumbs pd-crumbs">
+    <a th:href="@{/}">Home</a> / <a th:href="@{/shop}">Menu</a> /
+    <span th:text="${product.name}">Product</span>
+  </div>
+
+  <!-- PRODUCT -->
+  <section class="pd">
+
+    <div class="pd-media">
+      <img th:if="${img != null}" th:src="@{${img}}" th:alt="${product.name}">
+      <span class="pd-emoji" th:unless="${img != null}"
+            th:text="${product.category == 'BREAD' ? '🍞' : (product.category == 'CAKE' ? '🎂' : '🥐')}">🍞</span>
+      <span class="ptag" th:if="${product.stock == 0}">Sold out</span>
+      <span class="ptag" th:if="${product.stock > 0 and product.stock <= 5}" th:text="'Only ' + ${product.stock} + ' left'">Only 3 left</span>
+    </div>
+
+    <div class="pd-info">
+      <h1 th:text="${product.name}">Cheese Sandwich</h1>
+
+      <div class="pd-meta">
+        <a class="prate" href="#reviews">
+          <th:block th:if="${summary.count > 0}">
+            <span class="stars" th:text="${summary.stars}">★★★★★</span>
+            <small th:text="${#numbers.formatDecimal(summary.average,1,1) + ' (' + summary.count + ')'}">4.5 (2)</small>
+          </th:block>
+          <small th:if="${summary.count == 0}">No reviews yet</small>
+        </a>
+        <span class="pd-chip" th:text="${product.category == 'BREAD' ? 'Bread & Savouries' : (product.category == 'CAKE' ? 'Cakes' : 'Pastries & Cake Pieces')}">Bread</span>
+      </div>
+
+      <p class="pd-desc"
+         th:text="${product.category == 'BREAD' ? 'Baked fresh every day with quality ingredients. A simple, satisfying choice for any time of the day.'
+                  : (product.category == 'CAKE' ? 'A freshly baked cake made with quality ingredients, perfect for sharing on any special occasion.'
+                  : 'A freshly made pastry treat, baked with quality ingredients and best enjoyed on the day.')}">
+        Baked fresh every day.
+      </p>
+
+      <dl class="pd-facts">
+        <div><dt>Type</dt><dd th:text="${product.detail}">Wheat</dd></div>
+        <div><dt>Availability</dt>
+          <dd th:class="${product.stock == 0} ? 'out' : (${product.stock <= 5} ? 'low' : 'in')"
+              th:text="${product.stock == 0 ? 'Sold out' : (product.stock <= 5 ? 'Only ' + product.stock + ' left' : 'In stock')}">In stock</dd></div>
+      </dl>
+
+      <div class="pd-price" th:text="'Rs. ' + ${#numbers.formatDecimal(product.price,1,'COMMA',2,'POINT')}">Rs. 250.00</div>
+
+      <p class="pd-note">For large quantity orders, please
+        <a href="#" onclick="if(window.bakeryChat){bakeryChat.open(true);}return false;">contact</a> customer service.</p>
+
+      <!-- CUSTOMER: quantity + add to cart (no page reload) -->
+      <form class="pd-buy" method="post" th:action="@{/customer/cart/add}" data-ajax-cart
+            th:if="${product.stock > 0 and session.role == 'CUSTOMER'}">
+        <input type="hidden" name="productId" th:value="${product.id}">
+        <input type="hidden" name="back" th:value="${backUrl}">
+        <div class="stepper">
+          <button type="button" class="step-btn" data-step="-1" aria-label="Decrease quantity">&minus;</button>
+          <input name="qty" type="number" min="1" th:max="${product.stock}" value="1" required aria-label="Quantity">
+          <button type="button" class="step-btn" data-step="1" aria-label="Increase quantity">+</button>
+        </div>
+        <button class="btn" type="submit">Add To Cart</button>
+        <a class="btn ghost" th:href="@{/customer/cart}">View cart</a>
+      </form>
+
+      <!-- VISITOR -->
+      <div class="pd-buy" th:if="${product.stock > 0 and session.role == null}">
+        <a class="btn" th:href="@{/login}">Log in to order</a>
+      </div>
+
+      <!-- SOLD OUT -->
+      <div class="pd-buy" th:if="${product.stock == 0}">
+        <span class="btn ghost">Unavailable</span>
+      </div>
+
+      <div class="pd-buy" th:if="${session.role == 'ADMIN'}">
+        <a class="btn ghost" th:href="@{/admin/products(edit=${product.id})}">⚙ Edit this product</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEWS -->
+  <section class="card pd-reviews" id="reviews">
+    <div class="pd-rev-head">
+      <h2>Customer reviews</h2>
+      <div class="avg-box" th:if="${summary.count > 0}">
+        <strong class="avg-num" th:text="${#numbers.formatDecimal(summary.average,1,1)}">4.5</strong>
+        <div><span class="stars big" th:text="${summary.stars}"></span><br>
+          <small th:text="${summary.count + (summary.count == 1 ? ' review' : ' reviews')}"></small></div>
+      </div>
+    </div>
+
+    <p class="empty" th:if="${summary.count == 0}">No reviews yet. Be the first!</p>
+
+    <article class="review-card pd-review" th:each="r : ${items}">
+      <div class="review-top">
+        <div><strong th:text="${r.customerName}">Name</strong>
+          <small class="verified" th:if="${r.verified}">Verified buyer</small></div>
+        <small th:text="${r.createdDate}">2026-10-01</small>
+      </div>
+      <span class="stars" th:text="${r.stars}">★★★★★</span>
+      <p th:if="${r.text != ''}" th:text="${r.text}">Review text</p>
+      <div class="reply" th:if="${r.adminReply != ''}"><b>Crumb &amp; Co. replied:</b> <span th:text="${r.adminReply}"></span></div>
+    </article>
+
+    <div class="form-actions">
+      <a class="btn ghost" th:if="${summary.count > 3}" th:href="@{/reviews/{id}(id=${product.id})}">See all reviews</a>
+      <a class="btn" th:if="${session.role != 'ADMIN'}" th:href="@{/customer/reviews(productId=${product.id})}">Write a review</a>
+    </div>
+  </section>
+
+  <!-- RELATED -->
+  <section class="pd-related" th:if="${!#lists.isEmpty(related)}">
+    <h2>You may also like</h2>
+    <div class="pgrid">
+      <article class="pcard" th:each="o : ${related}" th:data-href="@{/product/{id}(id=${o.id})}"
+               th:with="oi=${@productImages.forProduct(o)}">
+        <div class="pimg">
+          <img th:if="${oi != null}" th:src="@{${oi}}" th:alt="${o.name}">
+          <span th:unless="${oi != null}" th:text="${o.category == 'BREAD' ? '🍞' : (o.category == 'CAKE' ? '🎂' : '🥐')}">🍞</span>
+        </div>
+        <div class="pbody">
+          <div class="pname"><a th:href="@{/product/{id}(id=${o.id})}" th:text="${o.name}">Name</a></div>
+          <div class="pdetail" th:text="${o.detail}">Detail</div>
+          <div class="pfoot"><strong class="pprice" th:text="'Rs. ' + ${#numbers.formatDecimal(o.price,1,'COMMA',2,'POINT')}">Rs. 0.00</strong></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+</main>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

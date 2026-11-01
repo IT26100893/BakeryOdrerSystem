@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments :: head('Custom Cakes')}"></head>
+
+<body>
+
+<nav th:replace="~{fragments :: nav('bookings')}"></nav>
+
+<main>
+
+ <!-- PAGE HEADER -->
+ <section class="page-header">
+
+  <h1>Custom Cake Studio</h1>
+
+  <p>
+   Create a personalised cake for birthdays, weddings
+   and special celebrations.
+  </p>
+
+ </section>
+
+
+ <div class="grid">
+
+
+  <!-- BOOKING FORM -->
+
+  <section class="card">
+
+   <h2 th:text="${item == null} ? 'Book Your Cake' : 'Edit Booking'">
+    Book Your Cake
+   </h2>
+
+
+   <form method="post"
+         action="/admin/bookings/save">
+
+    <input type="hidden"
+           name="id"
+           th:value="${item?.id}">
+
+
+    <!-- CUSTOMER NAME -->
+
+    <label for="customerName">
+     Customer name
+    </label>
+
+    <input id="customerName"
+           name="customerName"
+           required
+           autocomplete="name"
+           placeholder="Your full name"
+           th:value="${item?.customerName}">
+
+
+    <!-- PHONE -->
+
+    <label for="phone">
+     Phone number
+    </label>
+
+    <input id="phone"
+           name="phone"
+           type="tel"
+           required
+           pattern="[0-9+ ]{9,15}"
+           title="Enter 9 to 15 digits"
+           autocomplete="tel"
+           placeholder="07XXXXXXXX"
+           th:value="${item?.phone}">
+
+
+    <!-- FLAVOUR -->
+
+    <label for="flavour">
+     Cake flavour
+    </label>
+
+    <input id="flavour"
+           name="flavour"
+           list="flavours"
+           required
+           placeholder="Choose or type your flavour"
+           th:value="${item?.flavour}">
+
+    <datalist id="flavours">
+
+     <option value="Chocolate">
+     <option value="Vanilla">
+     <option value="Strawberry">
+     <option value="Red Velvet">
+     <option value="Butterscotch">
+     <option value="Coffee">
+     <option value="Lemon">
+
+    </datalist>
+
+
+    <!-- SIZE -->
+
+    <label for="sizeKg">
+     Cake size (kg)
+    </label>
+
+    <input id="sizeKg"
+           name="sizeKg"
+           type="number"
+           step="0.5"
+           min="0.5"
+           max="20"
+           required
+           placeholder="1"
+           th:value="${item?.sizeKg}">
+
+
+    <!-- MESSAGE -->
+
+    <label for="message">
+     Message on the cake
+    </label>
+
+    <textarea id="message"
+              name="message"
+              maxlength="60"
+              placeholder="e.g. Happy Birthday Amaya"
+              th:text="${item?.message}"></textarea>
+
+    <div class="hint">
+     <span id="msgCount">0</span>/60 characters
+    </div>
+
+
+    <!-- PICKUP DATE -->
+
+    <label for="pickupDate">
+     Pickup date
+    </label>
+
+    <input id="pickupDate"
+           name="pickupDate"
+           type="date"
+           required
+           th:value="${item?.pickupDate}">
+
+
+    <!-- STATUS WHEN EDITING -->
+
+    <div th:if="${item != null}">
+
+     <label for="status">
+      Booking status
+     </label>
+
+     <select id="status"
+             name="status">
+
+      <option th:each="s : ${ {'PENDING','CONFIRMED','COMPLETED','CANCELLED'} }"
+              th:value="${s}"
+              th:text="${s}"
+              th:selected="${item.status == s}">
+      </option>
+
+     </select>
+
+    </div>
+
+
+    <!-- DEFAULT STATUS -->
+
+    <input type="hidden"
+           name="status"
+           value="PENDING"
+           th:if="${item == null}">
+
+
+    <!-- PRICE -->
+
+    <div class="estimate">
+
+     <span>
+      Estimated Price
+      <br>
+      <small>Rs. 3,500 per kg</small>
+     </span>
+
+     <strong id="estimate">
+      Rs. 0.00
+     </strong>
+
+    </div>
+
+
+    <!-- BUTTONS -->
+
+    <div class="form-actions">
+
+     <button class="btn"
+             type="submit"
+             th:text="${item == null} ? '🎂 Book Cake' : '💾 Save Changes'">
+      Book Cake
+     </button>
+
+     <a class="btn ghost"
+        th:if="${item != null}"
+        href="/admin/bookings">
+      Cancel
+     </a>
+
+    </div>
+
+   </form>
+
+  </section>
+
+
+
+  <!-- BOOKINGS LIST -->
+
+  <section class="card">
+
+   <!-- SEARCH -->
+
+   <form class="search"
+         method="get">
+
+    <input name="q"
+           th:value="${q}"
+           placeholder="🔍 Search customer or flavour..."
+           aria-label="Search bookings">
+
+    <button class="btn"
+            type="submit">
+     Search
+    </button>
+
+   </form>
+
+
+   <!-- FILTERS -->
+
+   <div class="chips"
+        role="group"
+        aria-label="Filter by status">
+
+    <button type="button" class="chip" data-filter="ALL" aria-pressed="true">All</button>
+    <button type="button" class="chip" data-filter="PENDING" aria-pressed="false">Pending</button>
+    <button type="button" class="chip" data-filter="CONFIRMED" aria-pressed="false">Confirmed</button>
+    <button type="button" class="chip" data-filter="COMPLETED" aria-pressed="false">Completed</button>
+    <button type="button" class="chip" data-filter="CANCELLED" aria-pressed="false">Cancelled</button>
+
+    <span class="count" id="count" aria-live="polite"></span>
+
+   </div>
+
+
+   <!-- TABLE -->
+
+   <div class="wrap">
+
+    <table>
+
+     <thead>
+
+     <tr>
+      <th>Customer</th>
+      <th>Cake</th>
+      <th>Pickup</th>
+      <th>Estimate</th>
+      <th>Status</th>
+      <th>Actions</th>
+     </tr>
+
+     </thead>
+
+
+     <tbody>
+
+     <tr th:each="b : ${items}"
+         th:attr="data-status=${b.status}">
+
+      <td>
+
+       <strong th:text="${b.customerName}">
+        Customer
+       </strong>
+
+       <br>
+
+       <small class="id"
+              th:text="${b.phone}">
+        Phone
+       </small>
+
+      </td>
+
+
+      <td class="cake-info">
+
+       <b>
+        <span th:text="${b.flavour}">Chocolate</span>,
+        <span th:text="${b.sizeKg}">1</span>
+        kg
+       </b>
+
+       <small th:if="${!#strings.isEmpty(b.message)}"
+              th:text="'&quot;' + ${b.message} + '&quot;'">
+       </small>
+
+      </td>
+
+
+      <td th:text="${b.pickupDate}">
+       Date
+      </td>
+
+
+      <td>
+
+       <strong th:text="'Rs. ' + ${#numbers.formatDecimal(b.estimatedPrice,1,'COMMA',2,'POINT')}">
+        Rs. 3,500.00
+       </strong>
+
+      </td>
+
+
+      <td>
+
+       <span class="badge"
+             th:classappend="' ' + ${b.status}"
+             th:text="${b.status}">
+        PENDING
+       </span>
+
+      </td>
+
+
+      <td>
+
+       <a class="btn sm ghost"
+          th:href="@{/admin/bookings(edit=${b.id})}">
+        Edit
+       </a>
+
+       <a class="btn sm ghost"
+          th:href="@{/admin/bookings/detail/{id}(id=${b.id})}">
+        Summary
+       </a>
+
+       <form class="inline"
+             method="post"
+             th:action="@{/admin/bookings/delete/{id}(id=${b.id})}"
+             onsubmit="return confirm('Delete this booking?')">
+
+        <button class="btn sm"
+                type="submit">
+         Delete
+        </button>
+
+       </form>
+
+      </td>
+
+     </tr>
+
+     </tbody>
+
+    </table>
+
+   </div>
+
+
+   <!-- EMPTY -->
+
+   <p class="empty"
+      th:if="${#lists.isEmpty(items)}">
+
+    🎂 No custom cake bookings yet.
+    Book the first cake using the form.
+
+   </p>
+
+
+   <p class="empty"
+      id="noMatch"
+      hidden>
+
+    No bookings with this status.
+
+   </p>
+
+  </section>
+
+ </div>
+
+</main>
+
+
+
+<script>
+
+ (function () {
+
+  const RATE = 3500;
+
+  const size = document.getElementById('sizeKg');
+  const est = document.getElementById('estimate');
+
+  const msg = document.getElementById('message');
+  const cnt = document.getElementById('msgCount');
+
+  const date = document.getElementById('pickupDate');
+
+
+  function money(n) {
+
+   return 'Rs. ' + n.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+   });
+
+  }
+
+
+  function updateEstimate() {
+
+   if (!size || !est) return;
+
+   const value = parseFloat(size.value) || 0;
+
+   est.textContent = money(value * RATE);
+
+  }
+
+
+  function updateCount() {
+
+   if (!msg || !cnt) return;
+
+   cnt.textContent = msg.value.length;
+
+  }
+
+
+  if (size) {
+
+   size.addEventListener('input', updateEstimate);
+
+   updateEstimate();
+
+  }
+
+
+  if (msg) {
+
+   msg.addEventListener('input', updateCount);
+
+   updateCount();
+
+  }
+
+
+  /* Prevent past dates */
+
+  if (date && !date.value) {
+
+   const d = new Date();
+
+   d.setMinutes(
+           d.getMinutes() - d.getTimezoneOffset()
+   );
+
+   date.min = d.toISOString().slice(0, 10);
+
+  }
+
+
+  /* STATUS FILTER */
+
+  const chips =
+          document.querySelectorAll('.chip');
+
+  const rows =
+          document.querySelectorAll(
+                  'tbody tr[data-status]'
+          );
+
+  const count =
+          document.getElementById('count');
+
+  const noMatch =
+          document.getElementById('noMatch');
+
+
+  function applyFilter(filter) {
+
+   let shown = 0;
+
+
+   rows.forEach(function (row) {
+
+    const status =
+            row.getAttribute('data-status');
+
+    const show =
+            filter === 'ALL' ||
+            status === filter;
+
+    row.hidden = !show;
+
+    if (show) {
+     shown++;
+    }
+
+   });
+
+
+   chips.forEach(function (chip) {
+
+    chip.setAttribute(
+            'aria-pressed',
+            chip.dataset.filter === filter
+    );
+
+   });
+
+
+   if (count) {
+
+    count.textContent =
+            shown +
+            (shown === 1
+                    ? ' booking'
+                    : ' bookings');
+
+   }
+
+
+   if (noMatch) {
+
+    noMatch.hidden =
+            !(rows.length > 0 && shown === 0);
+
+   }
+
+  }
+
+
+  chips.forEach(function (chip) {
+
+   chip.addEventListener(
+           'click',
+           function () {
+
+            applyFilter(
+                    chip.dataset.filter
+            );
+
+           }
+   );
+
+  });
+
+
+  applyFilter('ALL');
+
+ })();
+
+</script>
+
+</body>
+</html>

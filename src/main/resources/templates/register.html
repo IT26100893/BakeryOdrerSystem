@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Register')}"></head>
+<body class="auth-page">
+<nav th:replace="~{fragments :: nav('register')}"></nav>
+
+<div class="auth-stage">
+  <section class="auth-wrap">
+    <div class="auth-left">
+      <div class="auth-logo"><svg class="logo" aria-hidden="true"><use href="#wheat"/></svg><strong>Crumb &amp; Co.</strong><small>Bakery &middot; Cakes &middot; Custom Orders</small></div>
+      <h1>Create your <span>account</span></h1>
+      <p class="sub">It only takes a minute to join.</p>
+
+      <div class="msg err" th:if="${error}" th:text="${error}" role="alert"></div>
+
+      <form method="post" th:action="@{/register}">
+        <div class="field"><svg class="ic"><use href="#i-user"/></svg>
+          <input name="name" placeholder="Full name" aria-label="Full name" required autocomplete="name" th:value="${name}"></div>
+        <div class="field"><svg class="ic"><use href="#i-mail"/></svg>
+          <input name="email" type="email" placeholder="Email Address" aria-label="Email address" required autocomplete="username" th:value="${email}"></div>
+        <div class="field"><svg class="ic"><use href="#i-phone"/></svg>
+          <input name="phone" type="tel" placeholder="Phone number" aria-label="Phone number" required autocomplete="tel" th:value="${phone}"></div>
+        <div class="field"><svg class="ic"><use href="#i-lock"/></svg>
+          <input id="pw" name="password" type="password" minlength="6" placeholder="Password (at least 6 characters)" aria-label="Password" required autocomplete="new-password">
+          <button type="button" class="eye" id="eye" aria-label="Show or hide password"><svg class="ic"><use href="#i-eye"/></svg></button></div>
+        <div class="field"><svg class="ic"><use href="#i-lock"/></svg>
+          <input id="pw2" name="confirm" type="password" minlength="6" placeholder="Confirm password" aria-label="Confirm password" required autocomplete="new-password"></div>
+        <button class="btn pill block" type="submit">Register <svg class="ic"><use href="#i-arrow"/></svg></button>
+      </form>
+
+      <div class="or"><span>or</span></div>
+      <p class="switch">Already registered? <a th:href="@{/login}">Log in</a></p>
+    </div>
+    <aside class="auth-right">
+      <p class="script">Sweet Moments</p>
+      <h2>Start Here <svg class="ic"><use href="#i-heart"/></svg></h2>
+      <p>Join Crumb &amp; Co. and enjoy easy ordering and more delicious moments.</p>
+      <ul class="perks">
+        <li><i><svg class="ic"><use href="#i-cake"/></svg></i><span><b>Custom Cake Bookings</b>Design a cake for your special day</span></li>
+        <li><i><svg class="ic"><use href="#i-star"/></svg></i><span><b>Easy Ordering</b>Quick &amp; simple</span></li>
+        <li><i><svg class="ic"><use href="#i-heart"/></svg></i><span><b>Track Your Orders</b>See every order in one place</span></li>
+      </ul>
+      <img class="auth-photo" th:src="@{/css/images/bread_and_savoury.jpg}" alt="">
+    </aside>
+  </section>
+</div>
+
+<script>
+  document.getElementById('eye').addEventListener('click', function () {
+    var t = document.getElementById('pw').type === 'password' ? 'text' : 'password';
+    document.getElementById('pw').type = t; document.getElementById('pw2').type = t;
+  });
+</script>
+</body></html>
